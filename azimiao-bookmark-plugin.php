@@ -48,6 +48,7 @@ function create_meow_bookmark_post_type()
         'hierarchical'       => false,
         'menu_position'      => null,
         'supports'           => array('title', 'author'),
+        'menu_icon'          => 'dashicons-admin-links'
     );
 
     register_post_type('meow_bookmark', $args);
