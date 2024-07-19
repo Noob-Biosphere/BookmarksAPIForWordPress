@@ -125,7 +125,7 @@ function display_meow_bookmark_meta_box($post)
 
     <div class="bookmark_icon_local_container">
         <label for="bookmark_icon_local"><?php _e('Image'); ?></label>
-        <input type="hidden" id="bookmark_icon_local" name="bookmark_icon_local" value=" <?php esc_attr($bookmark_icon_local_id) ?>" />
+        <input type="hidden" id="bookmark_icon_local" name="bookmark_icon_local" value="<?php echo esc_attr($bookmark_icon_local_id) ?>" />
         <div id="bookmark_icon_local_preview">
             <?php
             if ($bookmark_icon_local_id) {
