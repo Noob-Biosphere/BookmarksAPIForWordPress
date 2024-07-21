@@ -47,7 +47,7 @@ function create_meow_bookmark_post_type()
         'has_archive'        => false,
         'hierarchical'       => false,
         'menu_position'      => null,
-        'supports'           => array('title', 'author'),
+        'supports'           => array('title', 'author','page-attributes'),
         'menu_icon'          => 'dashicons-admin-links'
     );
 
@@ -76,6 +76,7 @@ function create_meow_bookmark_taxonomies()
     $args = array(
         'labels' => $labels,
         'hierarchical' => true,
+        'tax_position' => true,
         'show_admin_column' => true,
         'show_ui' => true,
         // 'show_in_rest' => true,
@@ -177,58 +178,6 @@ function display_meow_bookmark_meta_box($post)
 <?php
 }
 
-function meow_bookmark_taxonomy_add_meta_field()
-{
-?>
-    <tr class="form-field">
-        <th scope="row" valign="top">
-            <label for="priority"><?php _e('Priority'); ?></label>
-        </th>
-        <td>
-            <input type="number" name="priority" id="priority" value="0" />
-            <p class="description"><?php _e('Enter priority number for sorting.'); ?></p>
-        </td>
-    </tr>
-<?php
-}
-
-add_action('meow_bookmark_taxonomy_add_form_fields', 'meow_bookmark_taxonomy_add_meta_field');
-
-// 添加字段输入框到分类编辑页面
-function meow_bookmark_taxonomy_edit_meta_field($term)
-{
-
-    $priority = get_term_meta($term->term_id, 'priority', true);
-?>
-    <tr class="form-field">
-        <th scope="row" valign="top">
-            <label for="priority"><?php _e('Priority'); ?></label>
-        </th>
-        <td>
-            <input type="number" name="priority" id="priority" value="<?php echo esc_attr($priority); ?>" />
-            <p class="description"><?php _e('Enter priority number for sorting.'); ?></p>
-        </td>
-    </tr>
-<?php
-}
-
-add_action('meow_bookmark_taxonomy_edit_form_fields', 'meow_bookmark_taxonomy_edit_meta_field');
-
-// 保存字段数据
-function save_meow_bookmark_taxonomy_custom_meta($term_id)
-{
-
-    if (isset($_POST['priority'])) {
-        $priority = sanitize_text_field($_POST['priority']);
-        update_term_meta($term_id, 'priority', intval($priority));
-    } else {
-        update_term_meta($term_id, 'priority', 0);
-    }
-}
-
-add_action('created_meow_bookmark_taxonomy', 'save_meow_bookmark_taxonomy_custom_meta');
-add_action('edited_meow_bookmark_taxonomy', 'save_meow_bookmark_taxonomy_custom_meta');
-
 // save meta data when save post
 add_action('save_post', 'save_meow_bookmark_meta_box_data');
 
@@ -309,8 +258,6 @@ function add_meow_bookmark_filter_to_posts_admin()
     }
 }
 
-
-
 // regist ajax handler
 add_action('wp_ajax_get_meow_bookmarks', 'get_meow_bookmarks_callback');
 add_action('wp_ajax_nopriv_get_meow_bookmarks', 'get_meow_bookmarks_callback'); // 处理未登录用户的请求
@@ -321,9 +268,9 @@ function get_meow_bookmarks_callback()
 
     $allTerms = get_terms(array(
         'taxonomy' => 'meow_bookmark_taxonomy',
-        'order' => 'DESC',
-        'orderby'  => 'meta_value_num',
-        'meta_key' => 'priority',
+        'order' => 'ASC',
+        'orderby'  => 'tax_position',
+        'meta_key' => 'tax_position',
     ));
 
     $allTermsCopy = array();
