@@ -40,14 +40,14 @@ function create_meow_bookmark_post_type()
         'publicly_queryable' => false,
         'show_ui'            => true,
         'show_in_menu'       => true,
-        // 'show_in_rest'       => true,
+        'show_in_rest'       => true,
         'query_var'          => true,
         'rewrite'            => false,
         'capability_type'    => 'post',
         'has_archive'        => false,
-        'hierarchical'       => false,
+        'hierarchical'       => true,
         'menu_position'      => null,
-        'supports'           => array('title', 'author','page-attributes'),
+        'supports'           => array('title', 'author'),
         'menu_icon'          => 'dashicons-admin-links'
     );
 
@@ -79,9 +79,49 @@ function create_meow_bookmark_taxonomies()
         'tax_position' => true,
         'show_admin_column' => true,
         'show_ui' => true,
-        // 'show_in_rest' => true,
+        'show_in_rest' => true,
     );
     register_taxonomy('meow_bookmark_taxonomy', 'meow_bookmark', $args);
+}
+
+add_action('rest_api_init', 'create_meow_bookmark_meta');
+
+function create_meow_bookmark_meta()
+{
+    register_rest_field('meow_bookmark', 'raw', array(
+        'get_callback'      => 'meow_bookmarks_meta_callback',
+        'update_callback'   => null,
+        'schema'            => null,
+    ));
+}
+
+add_filter( 'rest_meow_bookmark_collection_params', 'meow_bookmark_add_rest_orderby_params', 10, 1 );
+
+function meow_bookmark_add_rest_orderby_params( $params ) {
+    $params['orderby']['enum'][] = 'menu_order';
+    return $params;
+}
+
+function meow_bookmarks_meta_callback($bookmarks, $field_name, $request)
+{
+
+    $bookmark_id = $bookmarks['id'];
+    $bookmark_name =  $bookmarks['title']['raw'];
+    $bookmark_taxonomy =  $bookmarks['meow_bookmark_taxonomy'];
+    $bookmark_description = get_post_meta($bookmark_id, 'bookmark_desc', true);
+    $bookmark_link = get_post_meta($bookmark_id, 'bookmark_link', true);
+    $bookmark_icon_id = get_post_meta($bookmark_id, 'bookmark_icon_local', true);
+    $bookmark_icon_external = get_post_meta($bookmark_id, 'bookmark_icon', true);
+
+    return array(
+        'id' => $bookmark_id,
+        'name' => $bookmark_name,
+        'categories' => $bookmark_taxonomy,
+        'description' => $bookmark_description,
+        'link' => $bookmark_link,
+        'icon' => $bookmark_icon_id ? wp_get_attachment_url($bookmark_icon_id) : "",
+        'icon_third' => $bookmark_icon_external,
+    );
 }
 
 
@@ -272,15 +312,10 @@ function get_meow_bookmarks_callback()
         'orderby'  => 'tax_position',
         'meta_key' => 'tax_position',
     ));
-
+    
     $allTermsCopy = array();
-    $allTermsCount = count($allTerms);
 
-    //var_dump($allTerms);
-    for ($i = 0; $i < $allTermsCount; $i++) {
-        # code...
-        $currentTerm = $allTerms[$i];
-
+    foreach($allTerms as &$currentTerm){
         $newTerm = array(
             'id' => $currentTerm->term_id,
             'term_taxonomy_id' => $currentTerm->term_taxonomy_id,
@@ -289,14 +324,16 @@ function get_meow_bookmarks_callback()
             'description' => $currentTerm->description,
             'parent' => $currentTerm->parent
         );
-
         $allTermsCopy[] = $newTerm;
     }
-
+    
+    unset($currentTerm);
 
     $args = array(
         'post_type' => 'meow_bookmark',
         'posts_per_page' => -1,
+        'order' => 'ASC',
+        "orderby" => 'menu_order',
     );
 
 
@@ -305,8 +342,6 @@ function get_meow_bookmarks_callback()
 
     if ($query->have_posts()) {
         while ($query->have_posts()) {
-
-
             $query->the_post();
             $bookmark_id = get_the_ID();
             $bookmark_name = get_the_title();
