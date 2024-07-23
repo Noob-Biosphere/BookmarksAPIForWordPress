@@ -1,13 +1,14 @@
 <?php
-/*
-Plugin Name: Azimiao's Website Bookmarks
-Plugin URI: https://github.com/Azimiao/BookmarksAPIForWordPress
-Description: 在后台添加或删除书签链接，并提供一个获取列表的 AJAX 接口，以此作为其他导航前端的数据源（注：大部分代码由 ChatGPT 完成）。
-Version: 1.0
-Author: Azimiao
-Author URI: https://www.azimiao.com
-License: GPL-3.0+
-License URI: https://www.gnu.org/licenses/gpl-3.0.txt
+/**
+ * Plugin Name: Azimiao's Website Bookmarks
+ * Requires Plugins: simple-custom-post-order
+ * Plugin URI: https://github.com/Azimiao/BookmarksAPIForWordPress
+ * Description: 在后台添加或删除书签链接，并提供一个获取列表的 AJAX 接口，以此作为其他导航前端的数据源（注：大部分代码由 ChatGPT 完成）。
+ * Version: 1.0
+ * Author: Azimiao
+ * Author URI: https://www.azimiao.com
+ * License: GPL-3.0+
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 */
 
 
@@ -71,7 +72,7 @@ function create_meow_bookmark_taxonomies()
         'update_item' => __('Update Category'),
         'add_new_item' => __('Add New Category'),
         'new_item_name' => __('New Category'),
-        'menu_name' => __('Categories list'),
+        'menu_name' => __('Bookmark Categories'),
     );
     $args = array(
         'labels' => $labels,
@@ -309,8 +310,7 @@ function get_meow_bookmarks_callback()
     $allTerms = get_terms(array(
         'taxonomy' => 'meow_bookmark_taxonomy',
         'order' => 'ASC',
-        'orderby'  => 'tax_position',
-        'meta_key' => 'tax_position',
+        'orderby'  => 'menu_order',
     ));
     
     $allTermsCopy = array();
