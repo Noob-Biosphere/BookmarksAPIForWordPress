@@ -12,17 +12,17 @@
 
 ### main 
 
-默认分支，提供基础功能
+旧版，提供基础功能（不再维护）
 
 ### third_order_plugin
 
 拓展分支，在 main 的基础上，可以使用拖拽对书签和分类排序。
 
-拓展分支依赖以下两个插件：
+拓展分支依赖以下插件：
 
-- `YIKES Simple Taxonomy Ordering`: 分类页面拖拽排序
-- `Simple Page Ordering`: 书签列表页面拖拽排序
+- `simple-custom-post-order`: 分类与书签列表页面拖拽排序
 
+插件依赖已在插件中声明，使用 WordPress 6.5 及以上版本时，安装此插件将会自动安装依赖插件。
 
 ## 特点
 
