@@ -62,7 +62,7 @@ add_action('init', 'create_meow_bookmark_taxonomies');
 function create_meow_bookmark_taxonomies()
 {
     $labels = array(
-        'name' => __('Categories list'),
+        'name' => __('Bookmark Categories'),
         'singular_name' => __('Categories'),
         'search_items' => __('Search Categories'),
         'all_items' => __('All Categories'),
