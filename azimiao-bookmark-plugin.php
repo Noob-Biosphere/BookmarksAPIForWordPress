@@ -212,7 +212,7 @@ function display_meow_bookmark_meta_box($post)
                 frame.on('select', function(e) {
                     var uploaded_image = frame.state().get('selection').first().toJSON();
                     $('#bookmark_icon_local').val(uploaded_image.id);
-                    $('#bookmark_icon_local_preview').html('<img src="' + uploaded_image.url + '" />');
+                    $('#bookmark_icon_local_preview').html('<img src="' + uploaded_image.url + '" style="max-width:100%" />');
                 });
 
                 frame.open();
