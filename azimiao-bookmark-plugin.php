@@ -4,7 +4,7 @@
  * Requires Plugins: simple-custom-post-order
  * Plugin URI: https://github.com/Azimiao/BookmarksAPIForWordPress
  * Description: 在后台添加或删除书签链接，并提供一个获取列表的 AJAX 接口，以此作为其他导航前端的数据源（注：大部分代码由 ChatGPT 完成）。
- * Version: 1.0
+ * Version: 1.1
  * Author: Azimiao
  * Author URI: https://www.azimiao.com
  * License: GPL-3.0+
@@ -113,6 +113,7 @@ function meow_bookmarks_meta_callback($bookmarks, $field_name, $request)
     $bookmark_link = get_post_meta($bookmark_id, 'bookmark_link', true);
     $bookmark_icon_id = get_post_meta($bookmark_id, 'bookmark_icon_local', true);
     $bookmark_icon_external = get_post_meta($bookmark_id, 'bookmark_icon', true);
+    $bookmark_isiframe = get_post_meta($bookmark_id, 'bookmark_isiframe', true);
 
     return array(
         'id' => $bookmark_id,
@@ -122,6 +123,7 @@ function meow_bookmarks_meta_callback($bookmarks, $field_name, $request)
         'link' => $bookmark_link,
         'icon' => $bookmark_icon_id ? wp_get_attachment_url($bookmark_icon_id) : "",
         'icon_third' => $bookmark_icon_external,
+        "iframe" => $bookmark_isiframe
     );
 }
 
@@ -150,6 +152,8 @@ function display_meow_bookmark_meta_box($post)
     $bookmark_link = get_post_meta($post->ID, 'bookmark_link', true);
     $bookmark_icon = get_post_meta($post->ID, 'bookmark_icon', true);
     $bookmark_icon_local_id = get_post_meta($post->ID, 'bookmark_icon_local', true);
+    // 是否是 iframe
+    $bookmark_isiframe = get_post_meta($post->ID, 'bookmark_isiframe', true);
 
     // 添加 nonce 以进行安全检查
     wp_nonce_field(basename(__FILE__), 'meow_bookmark_meta_box_nonce');
@@ -163,6 +167,12 @@ function display_meow_bookmark_meta_box($post)
     <p>
         <label for="bookmark_link"><?php _e('Link'); ?></label>
         <input type="text" id="bookmark_link" name="bookmark_link" value="<?php echo esc_attr($bookmark_link); ?>" style="width: 100%;">
+    </p>
+    <p>
+        <label for="bookmark_isiframe"><?php _e('is_iframe'); ?></label>
+        <input 
+            type="checkbox" id="bookmark_isiframe" name="bookmark_isiframe"value="1"<?php checked($bookmark_isiframe, '1'); ?>
+        >
     </p>
 
     <div class="bookmark_icon_local_container">
@@ -255,6 +265,12 @@ function save_meow_bookmark_meta_box_data($post_id)
 
     if (isset($_POST['bookmark_icon'])) {
         update_post_meta($post_id, 'bookmark_icon', sanitize_text_field($_POST['bookmark_icon']));
+    }
+
+    if (isset($_POST['bookmark_isiframe'])) {
+        update_post_meta($post_id, 'bookmark_isiframe', '1');
+    } else {
+        delete_post_meta($post_id, 'bookmark_isiframe');
     }
 }
 
@@ -350,7 +366,7 @@ function get_meow_bookmarks_callback()
             $bookmark_link = get_post_meta($bookmark_id, 'bookmark_link', true);
             $bookmark_icon_id = get_post_meta($bookmark_id, 'bookmark_icon_local', true);
             $bookmark_icon_external = get_post_meta($bookmark_id, 'bookmark_icon', true);
-
+            $bookmark_isiframe = get_post_meta($bookmark_id, 'bookmark_isiframe', true);
             $bookmark_taxonomy_ids = array();
 
             if ($bookmark_taxonomy != null && count($bookmark_taxonomy) > 0) {
@@ -371,6 +387,7 @@ function get_meow_bookmarks_callback()
                 'link' => $bookmark_link,
                 'icon' => $bookmark_icon_id ? wp_get_attachment_url($bookmark_icon_id) : "",
                 'icon_third' => $bookmark_icon_external,
+                "iframe" => $bookmark_isiframe
             );
 
             $bookmarks[] = $bookmark_data;
